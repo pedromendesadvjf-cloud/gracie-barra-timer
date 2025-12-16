@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gracie Barra Timer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin: 0;
+    background: #c40000;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+header {
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+#timer {
+    font-size: 140px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+#status {
+    font-size: 40px;
+}
+#round {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+.buttons button, .presets button {
+    font-size: 22px;
+    padding: 12px 20px;
+    margin: 6px;
+    border: none;
+    border-radius: 8px;
+}
+.buttons button {
+    background: black;
+    color: white;
+}
+.presets button {
+    background: white;
+    color: #c40000;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<header>GRACIE BARRA • TIMER</header>
+
+<div id="round">Round 1 / 1</div>
+<div id="status">TREINO</div>
+<div id="timer">00:00</div>
+
+<div class="buttons">
+    <button onclick="start()">START</button>
+    <button onclick="pause()">PAUSE</button>
+    <button onclick="reset()">RESET</button>
+</div>
+
+<div class="presets">
+    <button onclick="setPreset(300,120,4)">5x2 (4)</button>
+    <button onclick="setPreset(360,120,4)">6x2 (4)</button>
+    <button onclick="setPreset(420,120,4)">7x2 (4)</button>
+    <button onclick="setPreset(600,120,4)">10x2 (4)</button>
+    <button onclick="setPreset(120,40,10)">2x40 (10)</button>
+    <button onclick="setPreset(180,60,10)">3x60 (10)</button>
+</div>
+
+<audio id="beep">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+</audio>
+
+<script>
+let work=300, rest=120, rounds=1;
+let currentRound=1, timeLeft=0;
+let phase="TREINO", interval=null;
+
+function setPreset(w,r,ro){
+    work=w; rest=r; rounds=ro;
+    reset();
+}
+
+function start(){
+    if(interval) return;
+    interval=setInterval(tick,1000);
+    beep();
+}
+
+function pause(){
+    clearInterval(interval);
+    interval=null;
+}
+
+function reset(){
+    pause();
+    phase="TREINO";
+    currentRound=1;
+    timeLeft=work;
+    update();
+}
+
+function tick(){
+    timeLeft--;
+    if(timeLeft<=10 && timeLeft>0) beep();
+    if(timeLeft<=0){
+        beep(); beep();
+        if(phase==="TREINO"){
+            phase="DESCANSO";
+            timeLeft=rest;
+        } else {
+            currentRound++;
+            if(currentRound>rounds){
+                pause();
+                return;
+            }
+            phase="TREINO";
+            timeLeft=work;
+        }
+    }
+    update();
+}
+
+function update(){
+    document.getElementById("status").innerText=phase;
+    document.getElementById("round").innerText=
+        `Round ${currentRound} / ${rounds}`;
+    document.getElementById("timer").innerText=
+        `${String(Math.floor(timeLeft/60)).padStart(2,"0")}:${String(timeLeft%60).padStart(2,"0")}`;
+}
+
+function beep(){
+    document.getElementById("beep").play();
+}
+
+reset();
+</script>
+
+</body>
+</html>
